@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Neopens.FrameworkLite/Neopens.FrameworkLite.csproj" Id="b70c4c40-b0de-427a-83f6-c6b1fe2f8b45" />
+  </Folder>
+  <Folder Name="/Test/">
+    <Project Path="../../test/Neopens.FrameworkLite.Test/Neopens.FrameworkLite.Test.csproj" Id="4897e360-9d2d-4bff-8583-957741f8fa79" />
+  </Folder>
+</Solution>
