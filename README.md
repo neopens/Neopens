@@ -87,8 +87,73 @@
 - 按日期/文件大小自动滚动分片
 
 - 异常堆栈自动格式化、全局开关可控
+  
+### 📐 框架层级架构示意图
 
+以下为 GitHub 原生可直接渲染的架构分层图，展示完整层级依赖关系：
 
+```mermaid 
+
+graph TD
+    subgraph 应用业务层
+        A[自定义业务服务]
+    end
+
+    subgraph 扩展能力层
+        B1[AOP 方法拦截]
+        B2[轻量事件总线]
+    end
+
+    subgraph 核心管理层
+        C1[ServiceManager 全局管理器]
+        C2[延迟消息队列]
+        C3[全局事件调度]
+    end
+
+    subgraph 服务基础层
+        D1[BusinessService 业务基类]
+        D2[BasicService 单例基类]
+    end
+
+    subgraph 基础规范层
+        E1[统一返回模型]
+        E2[业务状态码]
+        E3[框架异常定义]
+    end
+
+    subgraph 日志系统层
+        F1[分级日志输出]
+        F2[日志滚动分片]
+    end
+
+    %% 依赖流向
+    A -- 拓展使用 --> B1
+    A -- 拓展使用 --> B2
+    B1 --> C1
+    B2 --> C3
+    C1 & C3 --> D1
+    D1 --> D2
+    D2 --> E1 & E2 & E3
+    C1 -.-> F1
+    D1 -.-> F1
+
+    %% 样式定义
+    classDef app fill:#f5f3ff,stroke:#8b5cf6,stroke-width:2px
+    classDef extend fill:#fefce8,stroke:#eab308,stroke-width:2px
+    classDef core fill:#f0fdf4,stroke:#22c55e,stroke-width:2px
+    classDef service fill:#eef8ff,stroke:#3b82f6,stroke-width:2px
+    classDef base fill:#f0f4f8,stroke:#64748b,stroke-width:2px
+    classDef log fill:#fdf2f8,stroke:#ec4899,stroke-width:2px
+
+    class A app
+    class B1,B2 extend
+    class C1,C2,C3 core
+    class D1,D2 service
+    class E1,E2,E3 base
+    class F1,F2 log
+```
+
+---
 
 ## 📦 安装与引入
 
