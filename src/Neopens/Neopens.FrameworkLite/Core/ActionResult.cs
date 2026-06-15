@@ -15,12 +15,12 @@ namespace Neopens.FrameworkLite.Core
 
         public ActionResult()
         {
-            Time  = DateTime.Now;
+            Time  = DateTime.UtcNow;
             Message =  string.Empty;
         }
         public override string ToString()
         {
-            return $"[{Time.ToString("yyyy-MM-dd HH:mm:ss:fff")}] State:{State} | Message:{Message} | Content:{Content?.ToString() ?? "null"}";
+            return $"[{Time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss:fff")}] State:{State} | Message:{Message} | Content:{Content?.ToString() ?? "null"}";
         }
     }
 

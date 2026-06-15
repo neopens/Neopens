@@ -1,11 +1,7 @@
-﻿
-using Neopens.FrameworkLite;
-using Neopens.FrameworkLite.Core;
-using Neopens.FrameworkLite.Log;
-using Neopens.FrameworkLite.Test.BusinessServices;
+﻿using Neopens.FrameworkLite.Core;
+using Neopens.FrameworkLite.Logging;
 
-FrameworkLiteEnvironment.LogEnabled = true;
-FrameworkLiteEnvironment.SaveLogFile = true;
+
 const string TestService = nameof(TestService);
 
 ServiceManager.Instance.Initialize(null);

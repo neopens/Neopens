@@ -1,4 +1,4 @@
-﻿using Neopens.FrameworkLite.Log;
+﻿using Neopens.FrameworkLite.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;

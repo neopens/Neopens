@@ -50,7 +50,7 @@ namespace Neopens.FrameworkLite.Core
 
         public async Task<IActionResult> SendMessageAsync(string serviceName, string methodName, params object[] args)
         {
-            var result = new ServiceActionResult<object>() { State = ActionState.NoCreated };
+            var result = new ServiceActionResult<object>() { State = ActionState.NotCreated };
 
             try
             {
@@ -67,7 +67,7 @@ namespace Neopens.FrameworkLite.Core
             {
                 SendMessageIfServiceNotLoad(serviceName, methodName, args);
 
-                result.State = ActionState.NoCreated;
+                result.State = ActionState.NotCreated;
 
                 result.Message = $"{serviceName} not loaded, message queued";
 
@@ -79,7 +79,7 @@ namespace Neopens.FrameworkLite.Core
 
         public async Task<IActionResult<TContent>> SendMessageAsync<TContent>(string serviceName, string methodName, params object[] args)
         {
-            var result = new ServiceActionResult<TContent>() { State = ActionState.NoCreated };
+            var result = new ServiceActionResult<TContent>() { State = ActionState.NotCreated };
 
             try
             {
@@ -96,7 +96,7 @@ namespace Neopens.FrameworkLite.Core
             {
                 SendMessageIfServiceNotLoad(serviceName, methodName, args);
 
-                result.State = ActionState.NoCreated;
+                result.State = ActionState.NotCreated;
 
                 result.Message = $"{serviceName} not loaded, message queued";
 
@@ -108,7 +108,7 @@ namespace Neopens.FrameworkLite.Core
 
         public IActionResult SendMessage(string serviceName, string methodName, params object[] args)
         {
-            var result = new ServiceActionResult<object>() { State = ActionState.NoCreated };
+            var result = new ServiceActionResult<object>() { State = ActionState.NotCreated };
 
             try
             {
@@ -125,7 +125,7 @@ namespace Neopens.FrameworkLite.Core
             {
                 SendMessageIfServiceNotLoad(serviceName, methodName, args);
 
-                result.State = ActionState.NoCreated;
+                result.State = ActionState.NotCreated;
 
                 result.Message = $"{serviceName} not loaded, message queued";
 
@@ -307,7 +307,7 @@ namespace Neopens.FrameworkLite.Core
                     }
                     catch (Exception ex)
                     {
-                        result.Message = "return type mismatch";
+                        result.Message = $"return type mismatch {ex.Message}";
                     }
                 }
             }

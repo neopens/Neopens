@@ -119,11 +119,6 @@ namespace Neopens.FrameworkLite.Core
             }
         }
 
-        internal T ExecuteMethod<T>(string methodName, params object[] args)
-        {        
-            return (T)ExecuteMethod(methodName, args);
-        }
-
         internal IEventListener GetEvent(string name) 
         {
             lock (_eventTableLocker) 

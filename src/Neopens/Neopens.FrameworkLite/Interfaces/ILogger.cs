@@ -1,11 +1,8 @@
-﻿using Neopens.FrameworkLite.Log;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace Neopens.FrameworkLite.Interfaces
 {
-    internal interface ILogger
+    public interface ILogger
     {
         void Debug(string message);
         void Debug(string format,params object[] args);
@@ -24,7 +21,7 @@ namespace Neopens.FrameworkLite.Interfaces
         void Error(string format, Exception ex, params object[] args);
     }
 
-    internal interface ILogger<T>: ILogger
+    public interface ILogger<T>: ILogger
     {       
     }
 }

@@ -53,7 +53,7 @@ namespace Neopens.FrameworkLite.Core
         /// <summary>
         /// 未创建
         /// </summary>
-        NoCreated = 400,
+        NotCreated = 400,
         /// <summary>
         /// 已存在
         /// </summary>
