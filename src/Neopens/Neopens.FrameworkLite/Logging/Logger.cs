@@ -193,6 +193,7 @@ namespace Neopens.FrameworkLite.Logging
             {
                 _currentLogStream = GetCurrentFileStream();
                 _currentLogStream.Write(logBytes, 0, logBytes.Length);
+                _currentLogStream.Flush();
             }
         }
 
@@ -261,6 +262,7 @@ namespace Neopens.FrameworkLite.Logging
                                                     FileShare.Read,
                                                     8192,
                                                     FileOptions.WriteThrough);
+
             }
             return _currentLogStream;
         }
