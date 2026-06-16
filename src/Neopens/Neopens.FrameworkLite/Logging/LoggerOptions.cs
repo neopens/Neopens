@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
+using System.Xml.Linq;
 
 namespace Neopens.FrameworkLite.Logging
 {
@@ -11,22 +11,34 @@ namespace Neopens.FrameworkLite.Logging
         public static readonly LoggerOptions Default = new LoggerOptions();
     
 
-        private const int MIN_FLUSH_INTERVAL = 33;
+        private const int MIN_FLUSH_INTERVAL = 1000;
+
+        /// <summary>
+        /// 单个日志文件最大默认大小 10mb
+        /// </summary>
+        private const int DEFAULT_PER_FILE_MAX_SIZE = 10 * 1024 * 1024;
+
+        /// <summary>
+        /// 单个日志文件最大默认大小 最低下线 1mb
+        /// </summary>
+        private const int PER_FILE_MAX_SIZE_LOW = 1 * 1024 * 1024;
+
+        private const string DEFAULT_FILE_NAME_FORMAT = "log_{0:yyyy-MM-dd_HH}";
 
         /// <summary>
         /// 最大缓存条目
         /// </summary>
-        public int MaxCacheSize { get; set; } = 1024;
+        public int MaxCacheSize { get; set; } = 20;
 
         /// <summary>
         /// 单个日志文件最大大小，单位：字节 默认 10MB
         /// </summary>
-        public int FileSize { get; set; } = 10 * 1024 * 1024;
+        public int PerFileMaxSize { get; set; } = DEFAULT_PER_FILE_MAX_SIZE;
 
         /// <summary>
         /// 日志文件格式
         /// </summary>
-        public string FileNameFormat { get; set; } = "log_{0:yyyy-MM-dd_HH}";
+        public string FileNameFormat { get; set; } = DEFAULT_FILE_NAME_FORMAT;
 
         /// <summary>
         /// 日志后缀
@@ -34,10 +46,10 @@ namespace Neopens.FrameworkLite.Logging
         public string FileExtension { get; set; } = ".log";
         public string LogDirectory { get; set; } = Path.Combine(Environment.CurrentDirectory, "Logs", "{0:yyyy-MM-dd}");
 
-        private int flushInterval = 333;
+        private int flushInterval = 3000;
 
         /// <summary>
-        /// 日志输入间隔 默认 333ms，最小 33ms
+        /// 日志输入间隔 默认 3s，最小 1s
         /// </summary>
         public int FlushInterval
         {
@@ -75,6 +87,72 @@ namespace Neopens.FrameworkLite.Logging
             }
 
             return levels.ToArray();
+        }
+
+        public static LoggerOptions ReadOptionsFromXml(string xmlFilePath) 
+        {
+            LoggerOptions options = new LoggerOptions()
+            {
+                LogIsEnable = false,
+                SaveLog2File = false,
+                LevelRules = "WARN | ERROR"
+            };
+
+            if (!File.Exists(xmlFilePath))
+            {
+                Debug.WriteLine($"XML config file not found: {xmlFilePath}");
+
+                return options;
+            }
+
+            XDocument xDoc = null;
+            try
+            {
+                xDoc = XDocument.Load(xmlFilePath);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to load XML config: {e.Message}");
+                return options;
+            }
+
+            var logElement = xDoc?.Root?.Element("Log");
+
+            if (logElement is null) return options;
+
+            string isEnableStr = logElement.Attribute("isEnable")?.Value?.ToLower()??"false";
+
+            if (bool.TryParse(isEnableStr, out var isEnable)) 
+            {
+                options.LogIsEnable = isEnable;
+                options.SaveLog2File = isEnable;
+            }
+
+            string fileMaxSizeStr = logElement.Attribute("perFileMaxSize")?.Value?.ToLower() ?? string.Empty;
+
+            if (int.TryParse(fileMaxSizeStr, out var fileMaxSize)) 
+            {
+                options.PerFileMaxSize = fileMaxSize > PER_FILE_MAX_SIZE_LOW ? fileMaxSize: PER_FILE_MAX_SIZE_LOW;
+            }
+
+            var layoutElement = logElement.Element("Layout");
+
+            if (layoutElement is null) return options;
+
+            options.LevelRules = layoutElement.Attribute("level")?.Value??"*";
+
+            string fileFormat = layoutElement.Attribute("name")?.Value ?? "";
+
+            var dirPath = Path.GetDirectoryName(fileFormat);
+
+            options.LogDirectory = string.IsNullOrEmpty(dirPath)? Path.Combine(Environment.CurrentDirectory, "Logs", "{0:yyyy-MM-dd}"): dirPath;
+
+            var fileName = Path.GetFileNameWithoutExtension(fileFormat);
+            var extension = Path.GetExtension(fileFormat);
+            options.FileNameFormat = string.IsNullOrEmpty(fileName)? DEFAULT_FILE_NAME_FORMAT: fileName;
+            options.FileExtension = extension;
+
+            return options;
         }
     }
 }

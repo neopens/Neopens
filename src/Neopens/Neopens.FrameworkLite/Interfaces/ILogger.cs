@@ -4,6 +4,11 @@ namespace Neopens.FrameworkLite.Interfaces
 {
     public interface ILogger
     {
+        /// <summary>
+        /// 日志可存储
+        /// </summary>
+        bool LogSaveable { get; set; }
+
         void Debug(string message);
         void Debug(string format,params object[] args);
         void Info(string message);

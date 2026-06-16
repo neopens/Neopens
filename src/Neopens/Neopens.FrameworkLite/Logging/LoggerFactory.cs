@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 
 namespace Neopens.FrameworkLite.Logging
@@ -11,16 +12,24 @@ namespace Neopens.FrameworkLite.Logging
         public static ILogger Default { get; set; } = GetDefaultLogger();
 
 
-        private static ILogger GetDefaultLogger() 
-        {
-            var options = new LoggerOptions()
-            {
-                LogIsEnable = true,
-                LogDirectory = Path.Combine(Environment.CurrentDirectory, "Logs"),
-                SaveLog2File = true,
-            };
+        private static ILogger GetDefaultLogger() => new Logger(GetDefaultOptions());
 
-            return new Logger(options);
+        private static LoggerOptions GetDefaultOptions() 
+        {
+            var entryAssemblyPath = Assembly.GetEntryAssembly()?.Location ?? string.Empty;
+
+            if (string.IsNullOrEmpty(entryAssemblyPath))
+            {
+               return new LoggerOptions()
+                {
+                    LogIsEnable = false,
+                    SaveLog2File = false,
+                    LevelRules = "WARN | ERROR"
+                };
+            }
+            string xmlFilePath = $"{entryAssemblyPath}.config";
+
+            return LoggerOptions.ReadOptionsFromXml(xmlFilePath);
         }
 
     }

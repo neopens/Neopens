@@ -15,6 +15,7 @@ namespace Neopens.FrameworkLite.Logging
         public bool IsInfoEnabled { get; protected set; }
         public bool IsWarnEnabled { get; protected set; }
         public bool IsErrorEnabled { get; protected set; }
+        public bool LogSaveable { get; set; }
 
         private readonly object _streamLocker = new object();
 
@@ -24,13 +25,19 @@ namespace Neopens.FrameworkLite.Logging
 
         private readonly LoggerOptions _options;
 
-        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
-
         private readonly List<LogMessage> _batchBuffer;
 
-        private Thread _loopThread;
+        private Timer _flushTimer;
 
         private FileStream _currentLogStream;
+
+        //0 表示 不在刷入磁盘 1 表示正在刷入磁盘
+        private int isFlushingFlag = 0;  
+
+        /// <summary>
+        /// 上一次刷入时间
+        /// </summary>
+        private DateTime _lastFlushTime = DateTime.UtcNow;
 
         public Logger() : this(LoggerOptions.Default) { }
 
@@ -40,10 +47,13 @@ namespace Neopens.FrameworkLite.Logging
 
             _batchBuffer = new List<LogMessage>(_options.MaxCacheSize);
 
+            LogSaveable = _options.SaveLog2File;
+
             SetLogLevelEnabled(_options.GetLevels());
 
-            StartThread();
+            _flushTimer = new Timer(FlushTimerCallback, null, 3000, options.FlushInterval);
         }
+
         ~Logger() { Dispose(); }
 
         public void Debug(string message)
@@ -99,13 +109,13 @@ namespace Neopens.FrameworkLite.Logging
 
         public void Dispose()
         {
-            _tokenSource.Cancel();
+            _flushTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-            _loopThread.Join(1000);
-
-            FlushQueueLogs();
+            FlushQueueLogs(true);
 
             CloseCurrentFileStream();
+
+            _flushTimer.Dispose();
 
             GC.SuppressFinalize(this);
         }
@@ -144,26 +154,37 @@ namespace Neopens.FrameworkLite.Logging
             }
         }
 
-        private void StartThread()
+
+        private void FlushTimerCallback(object state)
         {
-            _loopThread = new Thread(FlushLogCallback) { IsBackground = true };
+            if (Interlocked.Exchange(ref isFlushingFlag, 1) == 1) return;
 
-            _loopThread.Start(_tokenSource.Token);
-        }
-
-        private void FlushLogCallback(object state)
-        {
-            CancellationToken cancellationToken = (CancellationToken)state;
-
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
                 FlushQueueLogs();
-                cancellationToken.WaitHandle.WaitOne(_options.FlushInterval);
+            }
+            finally
+            {
+                Interlocked.Exchange(ref isFlushingFlag, 0);
+
             }
         }
 
-        private void FlushQueueLogs()
+       
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isFlush">true:强制刷入，不管到没到时间</param>
+        private void FlushQueueLogs(bool isFlush = false)
         {
+            if (!isFlush) 
+            {
+                var intervalMs = (DateTime.UtcNow - _lastFlushTime).TotalMilliseconds;
+
+                if (intervalMs < _options.FlushInterval) return;
+            }           
+
             _batchBuffer.Clear();
 
             while (messageQueue.TryDequeue(out LogMessage logMessage))
@@ -172,11 +193,13 @@ namespace Neopens.FrameworkLite.Logging
             }
 
             FlushLogs(_batchBuffer);
+
+            _lastFlushTime = DateTime.UtcNow;
         }
 
         private void FlushLogs(List<LogMessage> batchBuffer)
         {
-            if (!_options.SaveLog2File) return;
+            if (!LogSaveable) return;
 
             if (batchBuffer.Count <= 0) return;
 
@@ -247,7 +270,7 @@ namespace Neopens.FrameworkLite.Logging
 
                     bool isSameFile = string.Equals(currentFilePath, filePath);
 
-                    if (isSameFile && _currentLogStream.Length < _options.FileSize)
+                    if (isSameFile && _currentLogStream.Length < _options.PerFileMaxSize)
                     {
                         return _currentLogStream;
                     }
@@ -260,8 +283,7 @@ namespace Neopens.FrameworkLite.Logging
                                                     FileMode.Append,
                                                     FileAccess.Write,
                                                     FileShare.Read,
-                                                    8192,
-                                                    FileOptions.WriteThrough);
+                                                    65536);
 
             }
             return _currentLogStream;
@@ -283,7 +305,7 @@ namespace Neopens.FrameworkLite.Logging
         {
             FileInfo fileInfo = new FileInfo(filePath);
 
-            SplitLog(fileInfo, _options.FileSize);
+            SplitLog(fileInfo, _options.PerFileMaxSize);
 
             return fileInfo;
         }

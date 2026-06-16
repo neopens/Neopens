@@ -1,5 +1,12 @@
 ﻿using Neopens.FrameworkLite.Core;
 using Neopens.FrameworkLite.Logging;
+using Neopens.FrameworkLite.Test;
+using System.Reflection;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
+
+
 
 
 const string TestService = nameof(TestService);
@@ -19,14 +26,12 @@ var r2 = ServiceManager.Instance.SendMessage("TestService", "Echo01", "Hello Wor
 Console.WriteLine(r2);
 
 
-for (int i = 0; i < 1000; i++)
-{
-    LoggerFactory.Default.Warn($"Warn_{i}");
-    Thread.Sleep(333);
-}
+LoggerFactory.Default.Debug($"this is Debug");
+LoggerFactory.Default.Info($"this is Info");
+LoggerFactory.Default.Warn($"this is Warn"); 
 
+LoggerFactory.Default.Error($"this is Error");
 
-
-Console.Read();
+Console.ReadLine( );
 
 //Console.WriteLine("Hello, World!");
