@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <Version>1.0.0.2</Version>
+	  <Version>1.0.0.3</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Neopnes.FrameworkLite</Title>
@@ -10,10 +10,15 @@
     <RepositoryUrl>https://github.com/neopens/Neopens</RepositoryUrl>
     <PackageTags>Neo;Framework;Neopens;neopens;FrameworkLite;NeopensFrameworkLite</PackageTags>
     <AnalysisLevel>none</AnalysisLevel>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="C:\Users\Administrator\Desktop\neopens.jpg">
+    <None Include="..\..\..\neopens.jpg">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

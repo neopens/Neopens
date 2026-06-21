@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Neopens.FrameworkLite.Interfaces
+namespace Neopens.FrameworkLite.Logging
 {
     public interface ILogger
     {

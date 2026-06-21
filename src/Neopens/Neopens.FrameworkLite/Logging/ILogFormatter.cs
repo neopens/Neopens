@@ -1,9 +1,8 @@
-﻿using Neopens.FrameworkLite.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Neopens.FrameworkLite.Interfaces
+namespace Neopens.FrameworkLite.Logging
 {
     internal interface ILogFormatter
     {
